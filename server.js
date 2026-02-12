@@ -248,6 +248,12 @@ db.serialize(() => {
   });
   db.run("ALTER TABLE installers ADD COLUMN specialties TEXT", (err) => {
     if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
+  });
+  db.run("ALTER TABLE leads ADD COLUMN user_decision TEXT", (err) => {
+    if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
+  });
+  db.run("ALTER TABLE leads ADD COLUMN user_decision_at TEXT", (err) => {
+    if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
     startServer();
   });
 });
@@ -856,6 +862,7 @@ app.post("/api/proposals", authMiddleware, requireRole("installer"), (req, res) 
 app.get("/api/user/leads", authMiddleware, requireRole("user"), (req, res) => {
   db.all(
     `SELECT l.id, l.installer_id, l.uf, l.city, l.specialty_requested, l.details, l.status, l.created_at,
+            l.user_decision, l.user_decision_at,
             i.nome as installer_nome, i.telefone as installer_telefone, i.whatsapp as installer_whatsapp
      FROM leads l
      JOIN installers i ON i.id = l.installer_id
@@ -870,6 +877,57 @@ app.get("/api/user/leads", authMiddleware, requireRole("user"), (req, res) => {
       db.all(`SELECT * FROM proposals WHERE lead_id IN (${placeholders})`, leadIds, (err2, proposals) => {
         const byLead = (proposals || []).reduce((acc, p) => { acc[p.lead_id] = (acc[p.lead_id] || []).concat(p); return acc; }, {});
         res.json((rows || []).map(r => ({ ...r, proposals: byLead[r.id] || [] })));
+      });
+    }
+  );
+});
+
+// Usuário aceita ou rejeita proposta do instalador
+app.put("/api/user/leads/:id/decision", authMiddleware, requireRole("user"), (req, res) => {
+  const leadId = Number(req.params.id);
+  const decision = String(req.body.decision || "").trim().toLowerCase();
+  if (decision !== "accepted" && decision !== "rejected") {
+    return res.status(400).json({ error: "decision deve ser 'accepted' ou 'rejected'." });
+  }
+
+  db.get(
+    `SELECT l.id, l.user_id, l.installer_id, i.whatsapp as installer_whatsapp, i.nome as installer_nome
+     FROM leads l JOIN installers i ON i.id = l.installer_id WHERE l.id = ? AND l.user_id = ?`,
+    [leadId, req.auth.id],
+    (err, lead) => {
+      if (err) return res.status(500).json({ error: "DB error" });
+      if (!lead) return res.status(404).json({ error: "Lead não encontrado." });
+
+      db.get("SELECT id, price, eta, notes FROM proposals WHERE lead_id = ? ORDER BY created_at DESC LIMIT 1", [leadId], (err2, prop) => {
+        if (err2) return res.status(500).json({ error: "DB error" });
+        const now = new Date().toISOString();
+        db.run(
+          "UPDATE leads SET user_decision = ?, user_decision_at = ?, status = ? WHERE id = ? AND user_id = ?",
+          [decision, now, decision === "accepted" ? "closed" : "proposal_sent", leadId, req.auth.id],
+          function (runErr) {
+            if (runErr) return res.status(500).json({ error: "Erro ao salvar." });
+            if (this.changes === 0) return res.status(404).json({ error: "Lead não encontrado." });
+            if (decision === "accepted" && lead.installer_whatsapp && prop) {
+              const wa = lead.installer_whatsapp.replace(/\D/g, "");
+              const waNumber = wa.startsWith("55") ? wa : "55" + wa;
+              const msg = [
+                "Olá! Aceitei sua proposta pelo site *Instaladores de Rastreadores*.",
+                "",
+                `*Valor:* ${prop.price || "—"}`,
+                `*Prazo:* ${prop.eta || "—"}`,
+                prop.notes ? `*Observações:* ${prop.notes}` : "",
+                "",
+                "Vamos combinar os detalhes?"
+              ].filter(Boolean).join("\n");
+              return res.json({
+                ok: true,
+                decision,
+                whatsapp_url: `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`
+              });
+            }
+            res.json({ ok: true, decision });
+          }
+        );
       });
     }
   );

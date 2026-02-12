@@ -191,17 +191,64 @@ async function loadMyLeadsPanel() {
     }
     myLeadsListEl.innerHTML = list
       .map((l) => {
-        const statusLabel = l.status === "proposal_sent" ? "Proposta enviada" : l.status === "closed" ? "Fechado" : "Aguardando";
         const prop = (l.proposals && l.proposals[0]) || null;
+        const decided = l.user_decision === "accepted" || l.user_decision === "rejected";
+        let statusLabel = "Aguardando";
+        if (decided) statusLabel = l.user_decision === "accepted" ? "Aceita" : "Rejeitada";
+        else if (prop) statusLabel = "Proposta enviada";
+        const showActions = prop && !decided;
         return `
-          <div class="interestCard" style="margin-top:8px;">
+          <div class="interestCard" style="margin-top:8px;" data-lead-id="${l.id}">
             <strong>${esc(l.installer_nome)}</strong> — ${esc(l.city)}/${esc(l.uf)}
             <span class="note">• ${statusLabel}</span>
             ${prop ? `<div class="note">Valor: ${esc(prop.price)} • Prazo: ${esc(prop.eta)}</div><div class="note">${esc(prop.notes)}</div>` : ""}
+            ${showActions ? `
+              <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                <button type="button" class="btn btnPrimary btnAcceptProposal" data-lead-id="${l.id}">✓ Aceitar</button>
+                <button type="button" class="btn btnRejectProposal" data-lead-id="${l.id}">Rejeitar</button>
+              </div>
+            ` : ""}
           </div>
         `;
       })
       .join("");
+
+    myLeadsListEl.querySelectorAll(".btnAcceptProposal").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = Number(btn.getAttribute("data-lead-id"));
+        btn.disabled = true;
+        try {
+          const res = await fetchAuth(`/api/user/leads/${id}/decision`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ decision: "accepted" })
+          });
+          if (res.whatsapp_url) window.open(res.whatsapp_url, "_blank", "noopener");
+          loadMyLeadsPanel();
+        } catch (e) {
+          alert(e.message || "Erro ao aceitar.");
+        }
+        btn.disabled = false;
+      });
+    });
+    myLeadsListEl.querySelectorAll(".btnRejectProposal").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = Number(btn.getAttribute("data-lead-id"));
+        if (!confirm("Rejeitar esta proposta?")) return;
+        btn.disabled = true;
+        try {
+          await fetchAuth(`/api/user/leads/${id}/decision`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ decision: "rejected" })
+          });
+          loadMyLeadsPanel();
+        } catch (e) {
+          alert(e.message || "Erro ao rejeitar.");
+        }
+        btn.disabled = false;
+      });
+    });
   } catch (_) {
     myLeadsListEl.innerHTML = "<p class=\"note note-warn\">Erro ao carregar.</p>";
   }
