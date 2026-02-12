@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "nome": "Carlos Instalador",
+    "estado": "SC",
+    "cidade": "Penha",
+    "telefone": "+55 47 99999-1111",
+    "especialidade": "Carros e motos"
+  },
+  {
+    "id": 2,
+    "nome": "Rafa Tech Rastreador",
+    "estado": "SC",
+    "cidade": "Florianópolis",
+    "telefone": "+55 48 98888-2222",
+    "especialidade": "Frotas"
+  },
+  {
+    "id": 3,
+    "nome": "Mendes Auto Elétrica",
+    "estado": "SP",
+    "cidade": "São Paulo",
+    "telefone": "+55 11 97777-3333",
+    "especialidade": "Linha pesada"
+  },
+  {
+    "id": 4,
+    "nome": "RastreiaSul Instalações",
+    "estado": "RS",
+    "cidade": "Porto Alegre",
+    "telefone": "+55 51 96666-4444",
+    "especialidade": "Caminhões"
+  }
+]

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Instaladores de Rastreadores — Buscar instaladores</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <div id="splash" class="splash" aria-hidden="false">
+      <div class="splashInner">
+        <img class="splashLogo" src="./assets/logo.png" alt="Instaladores de Rastreadores" />
+        <div class="splashText">Carregando</div>
+        <div class="splashLoader" aria-label="Carregando"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <a href="/index.html" class="logoLink"><img class="logo" src="./assets/logo.png" alt="Instaladores de Rastreadores" /></a>
+        <div class="brandText">
+          <h1>Buscar instaladores</h1>
+          <p>Selecione o estado e a cidade para ver instaladores na sua região.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card cardSearch">
+        <div class="dashHeader">
+          <h2 id="welcomeText">Olá</h2>
+          <button type="button" id="logoutBtn" class="btn logoutBtn">Sair</button>
+        </div>
+        <details class="card" style="margin-bottom: 20px;">
+          <summary style="cursor: pointer; font-weight: 600;">Minhas solicitações e propostas</summary>
+          <div id="myLeadsList" class="note" style="margin-top: 12px;"></div>
+        </details>
+
+        <div id="mapStep" class="searchStep mapStep">
+          <p class="stepLabel">1. Escolha o estado (mapa ou lista)</p>
+          <div id="brazilMap" class="brazilMap" aria-label="Mapa do Brasil - clique em um estado"></div>
+          <p class="stepLabel" style="margin-top: 20px;">Ou selecione pela lista:</p>
+          <div id="stateList" class="stateList"></div>
+        </div>
+
+        <div id="cityStep" class="searchStep cityStep" hidden>
+          <div class="stepHeader">
+            <button type="button" id="backToMap" class="backBtn">← Trocar estado</button>
+            <span id="selectedState" class="selectedState"></span>
+          </div>
+          <p class="stepLabel">2. Escolha a cidade</p>
+          <select class="input" id="cidadeSelect">
+            <option value="">Selecione uma cidade</option>
+          </select>
+          <p class="stepLabel" style="margin-top: 16px;">Filtrar por especialidade (opcional)</p>
+          <div class="specialtyGroup" id="specialtyFilter">
+            <label><input type="checkbox" name="specFilter" value="Telemetria" /> <span>Telemetria</span></label>
+            <label><input type="checkbox" name="specFilter" value="Vídeo Telemetria" /> <span>Vídeo Telemetria</span></label>
+            <label><input type="checkbox" name="specFilter" value="Rastreador com Bloqueio" /> <span>Rastreador com Bloqueio</span></label>
+            <label><input type="checkbox" name="specFilter" value="Rastreador sem Bloqueio" /> <span>Rastreador sem Bloqueio</span></label>
+          </div>
+          <input class="input" id="searchInput" placeholder="Buscar por nome..." style="margin-top: 12px;" />
+          <div class="note" id="hint"></div>
+        </div>
+
+        <div class="hr"></div>
+        <div id="installersList" class="installersList"></div>
+      </section>
+    </main>
+
+    <footer class="footer"><span>© Instaladores de Rastreadores</span></footer>
+    <script src="./dashboard-user.js"></script>
+  </body>
+</html>

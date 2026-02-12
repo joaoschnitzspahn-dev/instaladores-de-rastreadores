@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Instaladores de Rastreadores — Cadastro (Pendente)</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <!-- SPLASH - Tela de carregamento com logo -->
+    <div id="splash" class="splash" aria-hidden="false">
+      <div class="splashInner">
+        <img class="splashLogo" src="./assets/logo.png" alt="Instaladores de Rastreadores" />
+        <div class="splashText">Carregando</div>
+        <div class="splashLoader" aria-label="Carregando">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <a href="/index.html" class="logoLink" aria-label="Voltar à página inicial"><img class="logo" src="./assets/logo.png" alt="Instaladores de Rastreadores" /></a>
+        <div class="brandText">
+          <h1>Cadastro de instalador</h1>
+          <p>Após enviar, o cadastro ficará <strong>pendente</strong> até aprovação manual.</p>
+
+          <nav class="nav">
+            <a class="navBtn" href="/index.html">⬅️ Início</a>
+            <a class="navBtn" href="/login.html">🔐 Login</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <form id="registerForm" class="form" enctype="multipart/form-data">
+          <!-- NOME + EMAIL -->
+          <div class="grid2">
+            <input class="input" name="nome" placeholder="Nome completo *" required />
+            <input class="input" name="email" type="email" placeholder="Email *" required />
+          </div>
+
+          <!-- CPF + NASCIMENTO -->
+          <div class="grid2">
+            <input class="input" name="cpf" placeholder="CPF (somente números) *" required />
+            <input class="input" type="date" name="data_nascimento" required />
+          </div>
+
+          <!-- TELEFONE + WHATS -->
+          <div class="grid2">
+            <input class="input" name="telefone" placeholder="Telefone *" required />
+            <input class="input" name="whatsapp" placeholder="WhatsApp (opcional — se vazio usa telefone)" />
+          </div>
+
+          <!-- SENHA (para login após aprovação) -->
+          <input class="input" name="senha" type="password" placeholder="Senha para login (mín. 6 caracteres) *" required minlength="6" />
+
+          <!-- ESPECIALIDADES (multiselect) -->
+          <p class="stepLabel">Especialidades * (selecione uma ou mais)</p>
+          <div class="specialtyGroup" id="specialtyGroup" role="group" aria-label="Especialidades">
+            <label><input type="checkbox" name="specialties" value="Telemetria" /> <span>Telemetria</span></label>
+            <label><input type="checkbox" name="specialties" value="Vídeo Telemetria" /> <span>Vídeo Telemetria</span></label>
+            <label><input type="checkbox" name="specialties" value="Rastreador com Bloqueio" /> <span>Rastreador com Bloqueio</span></label>
+            <label><input type="checkbox" name="specialties" value="Rastreador sem Bloqueio" /> <span>Rastreador sem Bloqueio</span></label>
+          </div>
+          <input type="hidden" name="especialidade" id="especialidadeHidden" value="" />
+
+          <!-- ENDEREÇO -->
+          <input class="input" name="endereco" placeholder="Endereço completo *" required />
+
+          <!-- UF + CIDADE -->
+          <div class="grid2">
+            <select class="input" name="estado" id="estadoSelect" required>
+              <option value="">Estado (UF) *</option>
+              <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+              <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+              <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+              <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+              <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+              <option>SE</option><option>TO</option>
+            </select>
+
+            <select class="input" name="cidade" id="cidadeSelect" required disabled>
+              <option value="">Cidade *</option>
+            </select>
+          </div>
+
+          <!-- TIPO ATENDIMENTO -->
+          <select class="input" name="tipo_atendimento" required>
+            <option value="">Tipo de atendimento *</option>
+            <option value="loja">Loja física</option>
+            <option value="domicilio">A domicílio</option>
+            <option value="ambos">Ambos</option>
+          </select>
+
+          <div class="hr"></div>
+
+          <!-- DOCUMENTO -->
+          <div class="fileBox">
+            <div class="fileHeader">
+              <div class="fileTitle">📄 Documento para validação *</div>
+              <div class="fileHint">JPG/PNG/PDF • até 5MB</div>
+            </div>
+
+            <input id="documentoInput" class="fileInputHidden" type="file" name="documento" accept=".jpg,.jpeg,.png,.pdf" required />
+            <button id="documentoBtn" class="btn btnSecondary" type="button">Selecionar documento</button>
+            <div id="documentoName" class="fileName">Nenhum arquivo selecionado</div>
+          </div>
+
+          <!-- SELFIE -->
+          <div class="fileBox">
+            <div class="fileHeader">
+              <div class="fileTitle">🤳 Selfie de verificação *</div>
+              <div class="fileHint">Foto do rosto • JPG/PNG</div>
+            </div>
+
+            <input id="selfieInput" class="fileInputHidden" type="file" name="selfie" accept=".jpg,.jpeg,.png" required />
+            <button id="selfieBtn" class="btn btnSecondary" type="button">Tirar/Selecionar selfie</button>
+
+            <div class="fileRow">
+              <div id="selfieName" class="fileName">Nenhum arquivo selecionado</div>
+              <div class="chip" id="selfieChip" aria-hidden="true">Obrigatório</div>
+            </div>
+
+            <div class="previewWrap">
+              <img id="selfiePreview" class="selfiePreview" alt="Prévia da selfie" />
+            </div>
+          </div>
+
+          <button class="btn btnPrimary" type="submit">Enviar cadastro para aprovação</button>
+
+          <div class="note" id="msg"></div>
+          <div class="note subtle">* obrigatório</div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© Instaladores de Rastreadores</span>
+    </footer>
+
+    <script src="./register.js"></script>
+  </body>
+</html>

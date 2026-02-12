@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Instaladores de Rastreadores — Meus interessados</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <div id="splash" class="splash" aria-hidden="false">
+      <div class="splashInner">
+        <img class="splashLogo" src="./assets/logo.png" alt="Instaladores de Rastreadores" />
+        <div class="splashText">Carregando</div>
+        <div class="splashLoader" aria-label="Carregando"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <a href="/index.html" class="logoLink"><img class="logo" src="./assets/logo.png" alt="Instaladores de Rastreadores" /></a>
+        <div class="brandText">
+          <h1>Meus interessados</h1>
+          <p>Usuários que demonstraram interesse nos seus serviços. Informe valores e detalhes para cada um.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="dashHeader">
+          <h2 id="welcomeText">Olá</h2>
+          <button type="button" id="logoutBtn" class="btn logoutBtn">Sair</button>
+        </div>
+        <div class="note" id="hint"></div>
+        <div class="hr"></div>
+        <div id="interestsList"></div>
+      </section>
+    </main>
+
+    <footer class="footer"><span>© Instaladores de Rastreadores</span></footer>
+    <script src="./dashboard-installer.js"></script>
+  </body>
+</html>

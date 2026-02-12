@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Instaladores de Rastreadores — Login</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <div id="splash" class="splash" aria-hidden="false">
+      <div class="splashInner">
+        <img class="splashLogo" src="./assets/logo.png" alt="Instaladores de Rastreadores" />
+        <div class="splashText">Carregando</div>
+        <div class="splashLoader" aria-label="Carregando"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <a href="/index.html" class="logoLink"><img class="logo" src="./assets/logo.png" alt="Instaladores de Rastreadores" /></a>
+        <div class="brandText">
+          <h1>Entrar</h1>
+          <p>Login como usuário (buscar instaladores) ou como instalador (ver interessados).</p>
+          <nav class="nav">
+            <a class="navBtn" href="/index.html">⬅️ Voltar</a>
+            <a class="navBtn" href="/register-user.html">Cadastrar usuário</a>
+            <a class="navBtn" href="/register.html">Cadastrar instalador</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card authCard">
+        <form id="loginForm" class="form">
+          <p class="stepLabel">Tipo de conta</p>
+          <select class="input" name="tipo" id="tipoSelect" required>
+            <option value="user">Sou usuário (preciso de instalação)</option>
+            <option value="installer">Sou instalador (ofereço serviços)</option>
+            <option value="admin">Sou administrador</option>
+          </select>
+          <input class="input" name="email" type="email" placeholder="Email *" required />
+          <input class="input" name="senha" type="password" placeholder="Senha *" required />
+          <button class="btn btnPrimary" type="submit">Entrar</button>
+          <div class="note" id="msg"></div>
+        </form>
+        <div class="authToggle">
+          <a href="/register-user.html">Criar conta de usuário</a> · <a href="/register.html">Cadastrar como instalador</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><span>© Instaladores de Rastreadores</span></footer>
+    <script src="./login.js"></script>
+  </body>
+</html>

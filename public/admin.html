@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Instaladores de Rastreadores — Admin</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <!-- SPLASH - Tela de carregamento com logo -->
+    <div id="splash" class="splash" aria-hidden="false">
+      <div class="splashInner">
+        <img class="splashLogo" src="./assets/logo.png" alt="Instaladores de Rastreadores" />
+        <div class="splashText">Carregando</div>
+        <div class="splashLoader" aria-label="Carregando">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <a href="/index.html" class="logoLink" aria-label="Voltar à página inicial"><img class="logo" src="./assets/logo.png" alt="Instaladores de Rastreadores" /></a>
+        <div class="brandText">
+          <h1>Painel Administrativo</h1>
+          <p>Aprovação manual de instaladores.</p>
+
+          <nav class="nav">
+            <a class="navBtn" href="/index.html">⬅️ Início</a>
+            <a class="navBtn" href="/register.html">➕ Cadastrar instalador</a>
+            <a class="navBtn" href="/login.html">🔐 Login</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card" id="adminLoginCard">
+        <p class="stepLabel">Acesso administrativo</p>
+        <form id="adminLoginForm" class="form">
+          <input class="input" name="email" type="text" placeholder="Usuário (email)" required />
+          <input class="input" name="senha" type="password" placeholder="Senha" required />
+          <button class="btn btnPrimary" type="submit">Entrar</button>
+          <div class="note" id="adminLoginMsg"></div>
+        </form>
+      </section>
+      <section class="card" id="adminPanelCard" style="display: none;">
+        <div class="dashHeader">
+          <h2>Instaladores pendentes</h2>
+          <button type="button" id="adminLogoutBtn" class="btn logoutBtn">Sair</button>
+        </div>
+        <p class="note">Use o filtro abaixo para ver apenas pendentes ou todos. Aprove ou rejeite cada cadastro.</p>
+        <div class="grid2" style="margin-top: 16px;">
+          <select class="input" id="statusFilter">
+            <option value="">Todos</option>
+            <option value="pending" selected>Pendentes</option>
+            <option value="approved">Aprovados</option>
+            <option value="rejected">Rejeitados</option>
+          </select>
+          <input class="input" id="searchInput" placeholder="Buscar por nome, CPF, cidade..." />
+        </div>
+        <div class="hr"></div>
+        <div id="list" class="note"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© Instaladores de Rastreadores</span>
+    </footer>
+
+    <script src="./admin.js"></script>
+  </body>
+</html>

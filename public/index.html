@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Instaladores de Rastreadores — Início</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <!-- SPLASH - Loading inicial com logo -->
+    <div id="splash" class="splash" aria-hidden="false">
+      <div class="splashInner">
+        <img class="splashLogo" src="./assets/logo.png" alt="Instaladores de Rastreadores" />
+        <div class="splashText">Carregando</div>
+        <div class="splashLoader" aria-label="Carregando">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand">
+        <a href="/index.html" class="logoLink" aria-label="Página inicial"><img class="logo" src="./assets/logo.png" alt="Instaladores de Rastreadores" /></a>
+        <div class="brandText">
+          <h1>Instaladores de Rastreadores</h1>
+          <p>Conectamos quem precisa de instalação aos melhores instaladores da região.</p>
+        </div>
+        <img src="./assets/personagem.png" alt="" class="brandPersonagem" onerror="this.style.display='none'" />
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="card cardHome">
+        <p class="stepLabel">O que você deseja fazer?</p>
+        <div class="homeGrid">
+          <a href="/register.html" class="homeBtn">
+            <span class="homeBtnIcon">🔧</span>
+            <span class="homeBtnTitle">Cadastrar Instalador</span>
+            <span class="homeBtnDesc">Sou profissional e quero oferecer meus serviços</span>
+          </a>
+          <a href="/register-user.html" class="homeBtn">
+            <span class="homeBtnIcon">👤</span>
+            <span class="homeBtnTitle">Sou Cliente (preciso de instalação)</span>
+            <span class="homeBtnDesc">Cadastrar ou entrar para buscar instaladores</span>
+          </a>
+          <a href="/login.html" class="homeBtn homeBtnPrimary">
+            <span class="homeBtnIcon">🔐</span>
+            <span class="homeBtnTitle">Login</span>
+            <span class="homeBtnDesc">Entrar como usuário ou instalador</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>© Instaladores de Rastreadores</span>
+      <a href="/admin.html" class="adminLink">Admin</a>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
