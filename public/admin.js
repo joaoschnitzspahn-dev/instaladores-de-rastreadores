@@ -29,6 +29,8 @@ async function checkAdmin() {
   if (!token) {
     setAdminUI(false);
     return;
+  } else{
+    //fff
   }
   try {
     const res = await fetch("/api/me", { headers: { Authorization: `Bearer ${token}` } });

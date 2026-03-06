@@ -249,6 +249,15 @@ db.serialize(() => {
   db.run("ALTER TABLE installers ADD COLUMN specialties TEXT", (err) => {
     if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
   });
+  db.run("ALTER TABLE installers ADD COLUMN valor_base TEXT", (err) => {
+    if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
+  });
+  db.run("ALTER TABLE installers ADD COLUMN km_maximo TEXT", (err) => {
+    if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
+  });
+  db.run("ALTER TABLE installers ADD COLUMN valor_por_km TEXT", (err) => {
+    if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
+  });
   db.run("ALTER TABLE leads ADD COLUMN user_decision TEXT", (err) => {
     if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
   });
@@ -325,7 +334,6 @@ Atendimento: ${summary.tipo_atendimento}
 Painel admin:
 ${adminLink}
 (Use a admin key no painel)`;
-
 
   await transporter.sendMail({
     from: `Instaladores de Rastreadores <${GMAIL_USER}>`,
@@ -446,7 +454,8 @@ app.get("/api/installers", (req, res) => {
     params.push(like, like, like, like, like);
   }
 
-  const sql = `SELECT id, nome, estado, cidade, telefone, whatsapp, especialidade, COALESCE(specialties, '[]') as specialties, tipo_atendimento
+  const sql = `SELECT id, nome, estado, cidade, telefone, whatsapp, especialidade, COALESCE(specialties, '[]') as specialties, tipo_atendimento,
+       COALESCE(valor_base, '') as valor_base, COALESCE(km_maximo, '') as km_maximo, COALESCE(valor_por_km, '') as valor_por_km
      FROM installers
      WHERE ${where.join(" AND ")}
      ORDER BY datetime(created_at) DESC`;
@@ -501,13 +510,16 @@ app.post("/api/installers", uploadBoth, async (req, res) => {
     const specialtiesArr = parseSpecialties(req.body.specialties || req.body.especialidade);
     const especialidade = specialtiesArr.length ? specialtiesArr[0] : String(req.body.especialidade || "").trim();
     const specialtiesJson = JSON.stringify(specialtiesArr.length ? specialtiesArr : (req.body.especialidade ? [String(req.body.especialidade).trim()] : []));
+    const valor_base = String(req.body.valor_base || "").trim();
+    const km_maximo = String(req.body.km_maximo || "").trim();
+    const valor_por_km = String(req.body.valor_por_km || "").trim();
 
     const docFile = req.files?.documento?.[0];
     const selfieFile = req.files?.selfie?.[0];
     if (!docFile) return res.status(400).json({ error: "Envie o documento (JPG/PNG/PDF)." });
     if (!selfieFile) return res.status(400).json({ error: "Envie a selfie (JPG/PNG)." });
 
-    if (!nome || !email || !cpf || !data_nascimento || !endereco || !cidade || !telefone || !tipo_atendimento) {
+    if (!nome || !email || !cpf || !data_nascimento || !endereco || !cidade || !telefone || !tipo_atendimento || !valor_base || !km_maximo || !valor_por_km) {
       return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
     }
     if (specialtiesArr.length === 0 && !req.body.especialidade) return res.status(400).json({ error: "Selecione ao menos uma especialidade." });
@@ -522,9 +534,9 @@ app.post("/api/installers", uploadBoth, async (req, res) => {
 
     db.run(
       `INSERT INTO installers
-       (nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, documento_path, selfie_path, password_hash, specialties, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
-      [nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, documento_path, selfie_path, password_hash, specialtiesJson, createdAt],
+       (nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, documento_path, selfie_path, password_hash, specialties, valor_base, km_maximo, valor_por_km, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+      [nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, documento_path, selfie_path, password_hash, specialtiesJson, valor_base, km_maximo, valor_por_km, createdAt],
       async function (err) {
         if (err) return res.status(500).json({ error: "DB error" });
 

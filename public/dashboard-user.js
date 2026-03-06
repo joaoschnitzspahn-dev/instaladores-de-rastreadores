@@ -25,7 +25,7 @@ const STATE_NAMES = {
 
 let selectedUF = "";
 let selectedCity = "";
-let userLeads = []; // { installer_id } from GET /api/user/leads
+let userLeads = [];
 
 function getToken() {
   return localStorage.getItem("infra_token");
@@ -151,16 +151,24 @@ function renderInstallers(data) {
   }
 
   const specsLabel = (i) => (Array.isArray(i.specialties) && i.specialties.length ? i.specialties.join(" • ") : esc(i.especialidade || ""));
+  const valorInfo = (i) => {
+    const parts = [];
+    if (i.valor_base) parts.push(`Valor base: ${esc(i.valor_base)}`);
+    if (i.km_maximo) parts.push(`Até ${esc(i.km_maximo)} km`);
+    if (i.valor_por_km) parts.push(`${esc(i.valor_por_km)}/km`);
+    return parts.length ? parts.join(" • ") : "";
+  };
 
   installersList.innerHTML = data.map((i) => {
-    const wa = i.whatsapp ? `https://wa.me/${encodeURIComponent(i.whatsapp)}` : "";
+    const wa = i.whatsapp ? `https://wa.me/${encodeURIComponent(i.whatsapp.replace(/\D/g, ""))}?text=${encodeURIComponent("Olá! Gostaria de orçamento para instalação de rastreador.")}` : "";
     const already = hasLead(i.id);
+    const valorStr = valorInfo(i);
     return `
       <div class="card" style="margin-top:12px;">
         <div style="font-weight:800; font-size:15px;">${esc(i.nome)}</div>
         <div class="note">${specsLabel(i)} • ${esc(i.tipo_atendimento)}</div>
-        <div class="note">${esc(i.cidade)}/${esc(i.estado)}</div>
-        <div class="note">Tel: ${esc(i.telefone)} • Whats: ${esc(i.whatsapp)}</div>
+        ${valorStr ? `<div class="note">${valorStr}</div>` : ""}
+        <div class="note">${esc(i.cidade)}/${esc(i.estado)} • Tel: ${esc(i.telefone)}</div>
         ${wa ? `<a class="navBtn" target="_blank" rel="noopener" href="${wa}">💬 WhatsApp</a>` : ""}
         ${already ? `<span class="note note-ok">✓ Solicitação enviada</span>` : `<button type="button" class="btn btnPrimary" data-installer-id="${i.id}">Tenho interesse / Solicitar orçamento</button>`}
       </div>
