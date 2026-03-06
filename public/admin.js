@@ -77,12 +77,14 @@ function render(rows) {
     const selfie = r.selfie_path ? `<a class="navBtn" target="_blank" rel="noopener" href="${esc(r.selfie_path)}">🤳 Selfie</a>` : "";
     const specs = r.specialties ? (typeof r.specialties === "string" ? (() => { try { return JSON.parse(r.specialties); } catch (_) { return []; } })() : r.specialties) : (r.especialidade ? [r.especialidade] : []);
 
-    const actions = r.status === "pending"
+    const approveReject = r.status === "pending"
       ? `
         <button class="btn btnPrimary" data-act="approve" data-id="${r.id}">✅ Aprovar</button>
         <button class="btn" data-act="reject" data-id="${r.id}">⛔ Rejeitar</button>
       `
       : `<div class="note">Status: <strong>${esc(r.status)}</strong></div>`;
+    const deleteBtn = `<button class="btn" data-act="delete" data-id="${r.id}" style="color:#c00;">🗑️ Excluir</button>`;
+    const actions = approveReject + " " + deleteBtn;
 
     return `
       <div class="card" style="margin-top:12px;">
@@ -160,9 +162,11 @@ document.addEventListener("click", async (e) => {
   if (!btn) return;
   const id = btn.getAttribute("data-id");
   const act = btn.getAttribute("data-act");
+  if (act === "delete" && !confirm("Tem certeza que deseja excluir este instalador? Esta ação não pode ser desfeita.")) return;
   try {
     if (act === "approve") await fetchJSON(`/api/admin/installers/${id}/approve`, { method: "POST" });
     if (act === "reject") await fetchJSON(`/api/admin/installers/${id}/reject`, { method: "POST" });
+    if (act === "delete") await fetchJSON(`/api/admin/installers/${id}`, { method: "DELETE" });
     load();
   } catch (e2) {
     showMsg(e2.message);

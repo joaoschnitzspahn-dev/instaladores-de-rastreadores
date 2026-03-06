@@ -631,6 +631,20 @@ app.post("/api/admin/installers/:id/reject", optionalAuth, requireAdmin, (req, r
   );
 });
 
+app.delete("/api/admin/installers/:id", optionalAuth, requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  db.serialize(() => {
+    db.run("DELETE FROM proposals WHERE lead_id IN (SELECT id FROM leads WHERE installer_id = ?)", [id]);
+    db.run("DELETE FROM leads WHERE installer_id = ?", [id]);
+    db.run("DELETE FROM interests WHERE installer_id = ?", [id]);
+    db.run("DELETE FROM installers WHERE id = ?", [id], function (err) {
+      if (err) return res.status(500).json({ error: "DB error" });
+      if (this.changes === 0) return res.status(404).json({ error: "Não encontrado" });
+      res.json({ ok: true });
+    });
+  });
+});
+
 // ---------- CADASTRO DE USUÁRIO (cliente que precisa de instalação) ----------
 const registerUser = (req, res) => {
   const nome = String(req.body.nome || "").trim();
