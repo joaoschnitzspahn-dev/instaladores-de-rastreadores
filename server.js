@@ -43,6 +43,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(PUBLIC_PATH));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Download APK
+app.get("/download", (req, res) => {
+  const filePath = path.join(__dirname, "public", "download", "app.apk");
+  if (!fs.existsSync(filePath)) return res.status(404).send("APK não encontrado.");
+  res.download(filePath, "instaladores-rastreadores.apk");
+});
+
 // ---------- HELPERS ----------
 const STATES = [
   { uf: "AC", name: "Acre" },
