@@ -3,12 +3,23 @@ require("dotenv").config();
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
+const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require("multer");
 const nodemailer = require("nodemailer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Rate limiting: login e cadastro (5 req/min por IP)
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,
+  message: { error: "Muitas tentativas. Tente novamente em 1 minuto." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // 🔐 Admin: key (legado) ou login/senha
 const ADMIN_KEY = process.env.ADMIN_KEY || "infra-1234";
@@ -38,11 +49,20 @@ const db = new sqlite3.Database(DB_PATH);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Front
 app.use(express.static(PUBLIC_PATH));
-// Servir uploads para o admin visualizar documento/selfie
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Uploads: apenas admin (cookie ou Bearer)
+app.use("/uploads", (req, res, next) => {
+  const token = req.cookies?.admin_session || (req.header("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  const key = req.header("x-admin-key") || req.query.key;
+  if (key === ADMIN_KEY) return next();
+  const data = token ? getTokenData(token) : null;
+  if (data && data.type === "admin") return next();
+  return res.status(401).send("Não autorizado.");
+}, express.static(path.join(__dirname, "uploads")));
 
 // ---------- HELPERS ----------
 const STATES = [
@@ -98,10 +118,10 @@ function requireAdmin(req, res, next) {
   return res.status(401).json({ error: "Não autorizado." });
 }
 
-// ---------- AUTH (tokens em memória + hash de senha) ----------
+// ---------- AUTH (tokens em memória com expiração de 7 dias) ----------
 const crypto = require("crypto");
-const tokens = new Map(); // token -> { type: 'user'|'installer'|'admin', id }
-const SPECIALTIES_LIST = ["Telemetria", "Vídeo Telemetria", "Rastreador com Bloqueio", "Rastreador sem Bloqueio"];
+const TOKEN_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
+const tokens = new Map(); // token -> { type, id, exp }
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -116,13 +136,22 @@ function verifyPassword(password, stored) {
 }
 function createToken(type, id) {
   const token = crypto.randomBytes(32).toString("hex");
-  tokens.set(token, { type, id });
+  tokens.set(token, { type, id, exp: Date.now() + TOKEN_EXPIRY_MS });
   return token;
+}
+function getTokenData(token) {
+  const data = tokens.get(token);
+  if (!data) return null;
+  if (data.exp < Date.now()) {
+    tokens.delete(token);
+    return null;
+  }
+  return data;
 }
 function authMiddleware(req, res, next) {
   const raw = req.header("Authorization") || "";
   const token = raw.replace(/^Bearer\s+/i, "").trim();
-  const data = tokens.get(token);
+  const data = getTokenData(token);
   if (!data) return res.status(401).json({ error: "Não autorizado. Faça login." });
   req.auth = data;
   next();
@@ -131,7 +160,7 @@ function optionalAuth(req, res, next) {
   const raw = req.header("Authorization") || "";
   const token = raw.replace(/^Bearer\s+/i, "").trim();
   if (token) {
-    const data = tokens.get(token);
+    const data = getTokenData(token);
     if (data) req.auth = data;
   }
   next();
@@ -491,8 +520,24 @@ const uploadBoth = multer({
   limits: { fileSize: 5 * 1024 * 1024 }
 }).fields([{ name: "documento", maxCount: 1 }, { name: "selfie", maxCount: 1 }]);
 
-app.post("/api/installers", uploadBoth, async (req, res) => {
+app.post("/api/installers", authLimiter, uploadBoth, async (req, res) => {
   try {
+    const docFile = req.files?.documento?.[0];
+    const selfieFile = req.files?.selfie?.[0];
+    if (!docFile) return res.status(400).json({ error: "Envie o documento (JPG/PNG/PDF)." });
+    if (!selfieFile) return res.status(400).json({ error: "Envie a selfie (JPG/PNG)." });
+
+    const { fileTypeFromFile } = await import("file-type");
+    const docType = await fileTypeFromFile(docFile.path);
+    const selfieType = await fileTypeFromFile(selfieFile.path);
+    const docAllowed = docType && ["image/jpeg", "image/png", "application/pdf"].includes(docType.mime);
+    const selfieAllowed = selfieType && ["image/jpeg", "image/png"].includes(selfieType.mime);
+    if (!docAllowed || !selfieAllowed) {
+      try { fs.unlinkSync(docFile.path); } catch (_) {}
+      try { fs.unlinkSync(selfieFile.path); } catch (_) {}
+      return res.status(400).json({ error: "Arquivo inválido. Documento: JPG/PNG/PDF. Selfie: JPG/PNG." });
+    }
+
     const nome = String(req.body.nome || "").trim();
     const email = String(req.body.email || "").trim();
     const cpf = onlyDigits(req.body.cpf);
@@ -513,11 +558,6 @@ app.post("/api/installers", uploadBoth, async (req, res) => {
     const valor_base = String(req.body.valor_base || "").trim();
     const km_maximo = String(req.body.km_maximo || "").trim();
     const valor_por_km = String(req.body.valor_por_km || "").trim();
-
-    const docFile = req.files?.documento?.[0];
-    const selfieFile = req.files?.selfie?.[0];
-    if (!docFile) return res.status(400).json({ error: "Envie o documento (JPG/PNG/PDF)." });
-    if (!selfieFile) return res.status(400).json({ error: "Envie a selfie (JPG/PNG)." });
 
     if (!nome || !email || !cpf || !data_nascimento || !endereco || !cidade || !telefone || !tipo_atendimento || !valor_base || !km_maximo || !valor_por_km) {
       return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
@@ -676,11 +716,11 @@ const registerUser = (req, res) => {
     }
   );
 };
-app.post("/api/users", registerUser);
-app.post("/api/auth/register-user", registerUser);
+app.post("/api/users", authLimiter, registerUser);
+app.post("/api/auth/register-user", authLimiter, registerUser);
 
 // ---------- LOGIN (usuário, instalador ou admin) ----------
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", authLimiter, (req, res) => {
   const email = String(req.body.email || "").trim().toLowerCase();
   const senha = String(req.body.senha || "").trim();
   const tipo = String(req.body.tipo || req.body.role || "").trim(); // 'user' | 'installer' | 'admin'
@@ -690,6 +730,7 @@ app.post("/api/auth/login", (req, res) => {
   if (tipo === "admin" || (tipo !== "user" && tipo !== "installer" && email === ADMIN_USER)) {
     if (ADMIN_USER && email === ADMIN_USER && senha === ADMIN_PASS) {
       const token = createToken("admin", 0);
+      res.cookie("admin_session", token, { httpOnly: true, maxAge: TOKEN_EXPIRY_MS, sameSite: "lax" });
       return res.json({ ok: true, token, role: "admin", tipo: "admin" });
     }
     if (tipo === "admin") return res.status(401).json({ error: "Credenciais de admin incorretas." });
@@ -718,6 +759,11 @@ app.post("/api/auth/login", (req, res) => {
   }
 
   return res.status(400).json({ error: "Informe o tipo de conta: user, instalador ou admin." });
+});
+
+app.post("/api/auth/logout", (req, res) => {
+  res.clearCookie("admin_session");
+  res.json({ ok: true });
 });
 
 // Quem está logado (para o front redirecionar)

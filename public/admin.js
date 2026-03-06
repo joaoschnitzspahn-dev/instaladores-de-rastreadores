@@ -148,7 +148,8 @@ if (adminLoginForm) {
 }
 
 if (adminLogoutBtn) {
-  adminLogoutBtn.addEventListener("click", () => {
+  adminLogoutBtn.addEventListener("click", async () => {
+    try { await fetch("/api/auth/logout", { method: "POST", credentials: "include" }); } catch (_) {}
     localStorage.removeItem("infra_token");
     localStorage.removeItem("infra_tipo");
     setAdminUI(false);
