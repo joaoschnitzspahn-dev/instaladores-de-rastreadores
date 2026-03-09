@@ -100,10 +100,17 @@
 
           <!-- VALORES -->
           <div class="grid2">
-            <input class="input" name="valor_base" type="text" placeholder="Valor base (ex: R$ 150) *" required />
-            <input class="input" name="km_maximo" type="text" placeholder="Até quantos km atende (ex: 50) *" required />
+            <div>
+              <p class="stepLabel">Valor base — valor médio de instalação (ex: R$ 150) *</p>
+              <input class="input" name="valor_base" type="text" placeholder="Ex: R$ 150" required />
+            </div>
+            <div>
+              <p class="stepLabel">Até quantos km atende — km incluso no valor da instalação (ex: 50) *</p>
+              <input class="input" name="km_maximo" type="text" placeholder="Ex: 50" required />
+            </div>
           </div>
-          <input class="input" name="valor_por_km" type="text" placeholder="Valor por km de deslocamento (ex: R$ 2,50) *" required />
+          <p class="stepLabel">Valor por km do deslocamento — valor médio do km (ex: R$ 2,50) *</p>
+          <input class="input" name="valor_por_km" type="text" placeholder="Ex: R$ 2,50" required />
 
           <div class="hr"></div>
 
