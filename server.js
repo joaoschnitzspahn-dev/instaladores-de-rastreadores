@@ -148,6 +148,13 @@ function requireRole(role) {
     next();
   };
 }
+const SPECIALTIES_LIST = [
+  "Telemetria",
+  "Vídeo Telemetria",
+  "Rastreador com Bloqueio",
+  "Rastreador sem Bloqueio"
+];
+
 function parseSpecialties(val) {
   if (Array.isArray(val)) return val.filter(s => SPECIALTIES_LIST.includes(s));
   if (typeof val === "string") return val.split(",").map(s => s.trim()).filter(s => SPECIALTIES_LIST.includes(s));
