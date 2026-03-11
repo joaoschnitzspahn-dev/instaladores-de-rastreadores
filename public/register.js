@@ -176,6 +176,15 @@ if (form) {
       return;
     }
 
+    const MAX_FILE_MB = 4;
+    const docSize = documentoInput.files[0].size / (1024 * 1024);
+    const selfieSize = selfieInput.files[0].size / (1024 * 1024);
+    if (docSize > MAX_FILE_MB || selfieSize > MAX_FILE_MB) {
+      setMsg(`Documento e selfie devem ter no máximo ${MAX_FILE_MB}MB cada. Suas imagens: ${docSize.toFixed(1)}MB e ${selfieSize.toFixed(1)}MB. Reduza o tamanho ou tire novas fotos.`, "warn");
+      toast("Imagens muito grandes. Reduza para até 4MB cada.", false);
+      return;
+    }
+
     if (waEl && telEl && !waEl.value.trim()) waEl.value = telEl.value.trim();
 
     const fd = new FormData(form);
@@ -201,7 +210,8 @@ if (form) {
       }
 
       if (!res.ok || data.error) {
-        const err = data.error || `Erro ${res.status}. Tente novamente.`;
+        let err = data.error || `Erro ${res.status}. Tente novamente.`;
+        if (res.status === 413) err = "Imagens muito grandes. Reduza o tamanho (máx. 4MB cada) e tente novamente.";
         setMsg(err, "warn");
         toast(err, false);
         return;

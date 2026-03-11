@@ -163,7 +163,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        client_max_body_size 10M;
+        client_max_body_size 20M;
     }
 }
 ```
@@ -181,6 +181,29 @@ Acesse `http://SEU_IP` ou `http://SEU_DOMINIO`. Para HTTPS com certificado grát
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d SEU_DOMINIO
+```
+
+---
+
+## Erro 413 (imagens muito grandes) no cadastro
+
+Se o cadastro falhar com "Erro 413", o Nginx está limitando o tamanho do upload. No servidor:
+
+```bash
+sudo nano /etc/nginx/sites-available/instaladores
+```
+
+Dentro do bloco `location /`, adicione ou ajuste:
+
+```
+client_max_body_size 20M;
+```
+
+Depois:
+
+```bash
+sudo nginx -t
+sudo systemctl reload nginx
 ```
 
 ---

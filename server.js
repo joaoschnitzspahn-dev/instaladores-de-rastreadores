@@ -496,7 +496,7 @@ const uploadBoth = multer({
     if (file.fieldname === "selfie") return fileFilterSelfie(req, file, cb);
     cb(new Error("Campo de arquivo inválido."));
   },
-  limits: { fileSize: 5 * 1024 * 1024 }
+  limits: { fileSize: 8 * 1024 * 1024 }
 }).fields([{ name: "documento", maxCount: 1 }, { name: "selfie", maxCount: 1 }]);
 
 app.post("/api/installers", uploadBoth, async (req, res) => {
