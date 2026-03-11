@@ -48,7 +48,10 @@
           <!-- CPF + NASCIMENTO -->
           <div class="grid2">
             <input class="input" name="cpf" placeholder="CPF (somente números) *" required />
-            <input class="input" type="date" name="data_nascimento" required />
+            <div>
+              <p class="stepLabel">Data de nascimento *</p>
+              <input class="input" type="date" name="data_nascimento" required />
+            </div>
           </div>
 
           <!-- TELEFONE + WHATS -->
@@ -91,22 +94,28 @@
           </div>
 
           <!-- TIPO ATENDIMENTO -->
-          <select class="input" name="tipo_atendimento" required>
+          <select class="input" name="tipo_atendimento" id="tipoAtendimento" required>
             <option value="">Tipo de atendimento *</option>
             <option value="loja">Loja física</option>
             <option value="domicilio">A domicílio</option>
             <option value="ambos">Ambos</option>
           </select>
 
+          <!-- ENDEREÇO DA LOJA (quando loja física ou ambos) -->
+          <div id="enderecoLojaBox" style="display: none;">
+            <p class="stepLabel">Endereço da loja *</p>
+            <input class="input" name="endereco_loja" id="enderecoLojaInput" placeholder="Rua, número, bairro, cidade..." />
+          </div>
+
           <!-- VALORES -->
           <div class="grid2">
             <div>
-              <p class="stepLabel">Valor base — valor médio de instalação (ex: R$ 150) *</p>
-              <input class="input" name="valor_base" type="text" placeholder="Ex: R$ 150" required />
+              <p class="stepLabel">Valor base — valor médio de instalação (ex: R$ 50) *</p>
+              <input class="input" name="valor_base" type="text" placeholder="Ex: R$ 50" required />
             </div>
             <div>
-              <p class="stepLabel">Até quantos km atende — km incluso no valor da instalação (ex: 50) *</p>
-              <input class="input" name="km_maximo" type="text" placeholder="Ex: 50" required />
+              <p class="stepLabel">Até quantos km atende — km incluso no valor da instalação (ex: 25km) *</p>
+              <input class="input" name="km_maximo" type="text" placeholder="Ex: 25km" required />
             </div>
           </div>
           <p class="stepLabel">Valor por km do deslocamento — valor médio do km (ex: R$ 2,50) *</p>

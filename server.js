@@ -263,6 +263,9 @@ db.serialize(() => {
   db.run("ALTER TABLE installers ADD COLUMN valor_por_km TEXT", (err) => {
     if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
   });
+  db.run("ALTER TABLE installers ADD COLUMN endereco_loja TEXT", (err) => {
+    if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
+  });
   db.run("ALTER TABLE leads ADD COLUMN user_decision TEXT", (err) => {
     if (err && !String(err.message).includes("duplicate")) console.error("Migration:", err.message);
   });
@@ -516,6 +519,7 @@ app.post("/api/installers", uploadBoth, async (req, res) => {
     const whatsapp = toWhatsAppNumber(req.body.whatsapp || req.body.telefone);
 
     const tipo_atendimento = String(req.body.tipo_atendimento || "").trim();
+    const endereco_loja = String(req.body.endereco_loja || "").trim();
     const senha = String(req.body.senha || "").trim();
     const specialtiesArr = parseSpecialties(req.body.specialties || req.body.especialidade);
     const especialidade = specialtiesArr.length ? specialtiesArr[0] : String(req.body.especialidade || "").trim();
@@ -526,6 +530,9 @@ app.post("/api/installers", uploadBoth, async (req, res) => {
 
     if (!nome || !email || !cpf || !data_nascimento || !endereco || !cidade || !telefone || !tipo_atendimento || !valor_base || !km_maximo || !valor_por_km) {
       return res.status(400).json({ error: "Preencha todos os campos obrigatórios." });
+    }
+    if ((tipo_atendimento === "loja" || tipo_atendimento === "ambos") && !endereco_loja) {
+      return res.status(400).json({ error: "Informe o endereço da loja." });
     }
     if (specialtiesArr.length === 0 && !req.body.especialidade) return res.status(400).json({ error: "Selecione ao menos uma especialidade." });
     if (!isValidUF(estado)) return res.status(400).json({ error: "UF inválida." });
@@ -539,9 +546,9 @@ app.post("/api/installers", uploadBoth, async (req, res) => {
 
     db.run(
       `INSERT INTO installers
-       (nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, documento_path, selfie_path, password_hash, specialties, valor_base, km_maximo, valor_por_km, status, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
-      [nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, documento_path, selfie_path, password_hash, specialtiesJson, valor_base, km_maximo, valor_por_km, createdAt],
+       (nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, endereco_loja, documento_path, selfie_path, password_hash, specialties, valor_base, km_maximo, valor_por_km, status, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)`,
+      [nome, email, cpf, data_nascimento, endereco, estado, cidade, telefone, whatsapp, especialidade, tipo_atendimento, endereco_loja, documento_path, selfie_path, password_hash, specialtiesJson, valor_base, km_maximo, valor_por_km, createdAt],
       async function (err) {
         if (err) return res.status(500).json({ error: "DB error" });
 

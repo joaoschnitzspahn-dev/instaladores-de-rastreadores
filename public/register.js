@@ -190,10 +190,18 @@ if (form) {
         body: fd
       });
 
-      const data = await res.json();
+      let data = {};
+      try {
+        const text = await res.text();
+        if (text) data = JSON.parse(text);
+      } catch (_) {
+        setMsg(`Erro no servidor (${res.status}). Tente novamente.`, "warn");
+        toast("Resposta inválida do servidor. Tente novamente.", false);
+        return;
+      }
 
       if (!res.ok || data.error) {
-        const err = data.error || "Erro ao enviar cadastro.";
+        const err = data.error || `Erro ${res.status}. Tente novamente.`;
         setMsg(err, "warn");
         toast(err, false);
         return;
@@ -204,6 +212,7 @@ if (form) {
 
       form.reset();
       resetCities();
+      toggleEnderecoLoja();
 
       if (documentoName) documentoName.textContent = "Nenhum arquivo selecionado";
       if (selfieName) selfieName.textContent = "Nenhum arquivo selecionado";
@@ -214,13 +223,28 @@ if (form) {
       setSelfieOk(false);
     } catch (err) {
       setMsg("Falha ao enviar. Verifique sua conexão e tente novamente.", "warn");
-      toast("Falha de rede ao enviar.", false);
+      toast(err?.message || "Falha de rede ao enviar.", false);
     }
   });
 }
+
+// ====== ENDEREÇO DA LOJA (mostrar só quando loja física ou ambos) ======
+function toggleEnderecoLoja() {
+  const tipo = document.getElementById("tipoAtendimento")?.value || "";
+  const box = document.getElementById("enderecoLojaBox");
+  const input = document.getElementById("enderecoLojaInput");
+  if (!box || !input) return;
+  const show = tipo === "loja" || tipo === "ambos";
+  box.style.display = show ? "block" : "none";
+  input.required = show;
+  if (!show) input.value = "";
+}
+
+document.getElementById("tipoAtendimento")?.addEventListener("change", toggleEnderecoLoja);
 
 // init
 resetCities();
 setMsg("");
 if (selfiePreview) selfiePreview.style.display = "none";
 setSelfieOk(false);
+toggleEnderecoLoja();
